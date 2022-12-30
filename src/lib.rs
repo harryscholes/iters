@@ -83,6 +83,10 @@ mod tests {
             (1..3).repeat(2).collect::<Vec<i32>>(),
             Repeat::new(1..3, 2).collect::<Vec<i32>>()
         );
+        assert_eq!(
+            vec![1, 2, 3].into_iter().repeat(2).collect::<Vec<i32>>(),
+            Repeat::new(vec![1, 2, 3].into_iter(), 2).collect::<Vec<i32>>()
+        );
     }
 
     #[test]
@@ -126,5 +130,28 @@ mod tests {
         assert_eq!(iter.len(), 0);
         iter.next();
         assert_eq!(iter.len(), 0);
+    }
+
+    #[test]
+    fn test_repeat_pipelining() {
+        assert_eq!(
+            (1..3).repeat(2).map(|x| x * 2).collect::<Vec<i32>>(),
+            vec![2, 2, 4, 4]
+        );
+        assert_eq!(
+            (1..3).map(|x| x * 2).repeat(2).collect::<Vec<i32>>(),
+            vec![2, 2, 4, 4]
+        );
+        assert_eq!(
+            (1..3)
+                .repeat(2)
+                .zip((2..4).repeat(2))
+                .collect::<Vec<(i32, i32)>>(),
+            vec![(1, 2), (1, 2), (2, 3), (2, 3)]
+        );
+        assert_eq!(
+            (1..3).zip(2..4).repeat(2).collect::<Vec<(i32, i32)>>(),
+            vec![(1, 2), (1, 2), (2, 3), (2, 3)]
+        );
     }
 }
