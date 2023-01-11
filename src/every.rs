@@ -126,6 +126,16 @@ mod tests {
     }
 
     #[test]
+    fn test_every_size_hint_n5() {
+        let mut iter = (1..10).every(5);
+        assert_eq!(iter.size_hint(), (2, Some(2)));
+        iter.next();
+        assert_eq!(iter.size_hint(), (1, Some(1)));
+        iter.next();
+        assert_eq!(iter.size_hint(), (0, Some(0)));
+    }
+
+    #[test]
     fn test_every_len_n2() {
         let mut iter = (1..10).every(2);
         assert_eq!(iter.len(), 5);
@@ -163,6 +173,24 @@ mod tests {
         assert_eq!(iter.len(), 1);
         iter.next();
         assert_eq!(iter.len(), 0);
+    }
+
+    #[test]
+    fn test_every_len_n5() {
+        let mut iter = (1..10).every(5);
+        assert_eq!(iter.len(), 2);
+        iter.next();
+        assert_eq!(iter.len(), 1);
+        iter.next();
+        assert_eq!(iter.len(), 0);
+    }
+
+    #[test]
+    fn test_every_isomorphism() {
+        assert_eq!(
+            (1..10).every(1).collect::<Vec<i32>>(),
+            (1..10).collect::<Vec<i32>>(),
+        );
     }
 
     #[test]

@@ -133,6 +133,14 @@ mod tests {
     }
 
     #[test]
+    fn test_repeat_isomorphism() {
+        assert_eq!(
+            (1..10).repeat(1).collect::<Vec<i32>>(),
+            (1..10).collect::<Vec<i32>>(),
+        );
+    }
+
+    #[test]
     fn test_repeat_pipelining() {
         assert_eq!(
             (1..3).repeat(2).map(|x| x * 2).collect::<Vec<i32>>(),
