@@ -1,12 +1,21 @@
 use std::iter::Peekable;
 
-pub struct Repeat<I: Iterator> {
+#[derive(Clone)]
+pub struct Repeat<I>
+where
+    I: Iterator,
+    I::Item: Clone,
+{
     iter: Peekable<I>,
     n: usize,
     count: usize,
 }
 
-impl<I: Iterator> Repeat<I> {
+impl<I> Repeat<I>
+where
+    I: Iterator,
+    I::Item: Clone,
+{
     pub fn new(iter: I, n: usize) -> Repeat<I> {
         Repeat {
             iter: iter.peekable(),
@@ -66,6 +75,7 @@ pub trait RepeatIterator: Iterator {
     fn repeat(self, n: usize) -> Repeat<Self>
     where
         Self: Sized,
+        Self::Item: Clone,
     {
         Repeat::new(self, n)
     }
