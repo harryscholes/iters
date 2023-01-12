@@ -134,9 +134,20 @@ mod tests {
 
     #[test]
     fn test_repeat_isomorphism() {
+        let iter = 1..10;
         assert_eq!(
-            (1..10).repeat(1).collect::<Vec<i32>>(),
-            (1..10).collect::<Vec<i32>>(),
+            iter.clone().repeat(1).collect::<Vec<i32>>(),
+            iter.clone().collect::<Vec<i32>>(),
+        );
+        assert_eq!(
+            iter.clone()
+                .repeat(1)
+                .repeat(1)
+                .repeat(1)
+                .repeat(1)
+                .repeat(1)
+                .collect::<Vec<i32>>(),
+            iter.clone().collect::<Vec<i32>>(),
         );
     }
 

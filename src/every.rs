@@ -187,9 +187,20 @@ mod tests {
 
     #[test]
     fn test_every_isomorphism() {
+        let iter = 1..10;
         assert_eq!(
-            (1..10).every(1).collect::<Vec<i32>>(),
-            (1..10).collect::<Vec<i32>>(),
+            iter.clone().every(1).collect::<Vec<i32>>(),
+            iter.clone().collect::<Vec<i32>>(),
+        );
+        assert_eq!(
+            iter.clone()
+                .every(1)
+                .every(1)
+                .every(1)
+                .every(1)
+                .every(1)
+                .collect::<Vec<i32>>(),
+            iter.clone().collect::<Vec<i32>>(),
         );
     }
 
