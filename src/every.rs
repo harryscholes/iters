@@ -1,3 +1,4 @@
+#[derive(Clone)]
 pub struct Every<I> {
     iter: I,
     n: usize,

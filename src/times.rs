@@ -26,7 +26,7 @@ where
 
     fn next(&mut self) -> Option<I::Item> {
         match self.iter.next() {
-            Some(x) => return Some(x),
+            Some(x) => Some(x),
             None => {
                 if self.n == 0 {
                     return None;
