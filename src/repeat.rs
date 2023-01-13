@@ -1,12 +1,11 @@
-use std::iter::Peekable;
-
 #[derive(Clone)]
 pub struct Repeat<I>
 where
     I: Iterator,
     I::Item: Clone,
 {
-    iter: Peekable<I>,
+    iter: I,
+    el: Option<I::Item>,
     n: usize,
     count: usize,
 }
@@ -18,7 +17,8 @@ where
 {
     pub fn new(iter: I, n: usize) -> Repeat<I> {
         Repeat {
-            iter: iter.peekable(),
+            iter,
+            el: None,
             n,
             count: 0,
         }
@@ -33,28 +33,22 @@ where
     type Item = I::Item;
 
     fn next(&mut self) -> Option<I::Item> {
-        self.count += 1;
-
-        if self.count == self.n {
-            self.count = 0;
-            self.iter.next()
-        } else {
-            self.iter.peek().cloned()
+        if self.count == 0 {
+            self.el = self.iter.next();
+            if self.el.is_none() {
+                return None;
+            }
+            self.count = self.n;
         }
+
+        self.count -= 1;
+        self.el.clone()
     }
 
     fn size_hint(&self) -> (usize, Option<usize>) {
-        let (mut lower, upper) = self.iter.size_hint();
-
-        if lower > 0 {
-            lower *= self.n;
-            lower -= self.count;
-        }
-
-        match upper {
-            Some(_) => (lower, Some(lower)),
-            None => (lower, None),
-        }
+        let (lower, _) = self.iter.size_hint();
+        let l = lower * self.n + self.count;
+        (l, Some(l))
     }
 }
 
@@ -111,7 +105,27 @@ mod tests {
     }
 
     #[test]
-    fn test_repeat_size_hint() {
+    fn test_repeat_size_hint_n3() {
+        let mut iter = (1..3).repeat(3);
+        assert_eq!(iter.size_hint(), (6, Some(6)));
+        iter.next();
+        assert_eq!(iter.size_hint(), (5, Some(5)));
+        iter.next();
+        assert_eq!(iter.size_hint(), (4, Some(4)));
+        iter.next();
+        assert_eq!(iter.size_hint(), (3, Some(3)));
+        iter.next();
+        assert_eq!(iter.size_hint(), (2, Some(2)));
+        iter.next();
+        assert_eq!(iter.size_hint(), (1, Some(1)));
+        iter.next();
+        assert_eq!(iter.size_hint(), (0, Some(0)));
+        iter.next();
+        assert_eq!(iter.size_hint(), (0, Some(0)));
+    }
+
+    #[test]
+    fn test_repeat_size_hint_n2() {
         let mut iter = (1..3).repeat(2);
         assert_eq!(iter.size_hint(), (4, Some(4)));
         iter.next();
@@ -127,7 +141,27 @@ mod tests {
     }
 
     #[test]
-    fn test_repeat_len() {
+    fn test_repeat_len_n3() {
+        let mut iter = (1..3).repeat(3);
+        assert_eq!(iter.len(), 6);
+        iter.next();
+        assert_eq!(iter.len(), 5);
+        iter.next();
+        assert_eq!(iter.len(), 4);
+        iter.next();
+        assert_eq!(iter.len(), 3);
+        iter.next();
+        assert_eq!(iter.len(), 2);
+        iter.next();
+        assert_eq!(iter.len(), 1);
+        iter.next();
+        assert_eq!(iter.len(), 0);
+        iter.next();
+        assert_eq!(iter.len(), 0);
+    }
+
+    #[test]
+    fn test_repeat_len_n2() {
         let mut iter = (1..3).repeat(2);
         assert_eq!(iter.len(), 4);
         iter.next();
