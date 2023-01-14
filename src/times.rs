@@ -62,10 +62,12 @@ impl<I: Iterator> TimesIterator for I {}
 
 #[cfg(test)]
 mod tests {
+    use crate::test_iter_size;
+
     use super::*;
 
     #[test]
-    fn test_times_iterator_adapter() {
+    fn test_iterator_adapter() {
         assert_eq!(
             (1..3).times(2).collect::<Vec<i32>>(),
             Times::new(1..3, 2).collect::<Vec<i32>>()
@@ -77,18 +79,17 @@ mod tests {
     }
 
     #[test]
-    fn test_times_iteration_n2() {
+    fn test_iteration_n2() {
         let mut iter = (1..3).times(2);
         assert_eq!(iter.next(), Some(1));
         assert_eq!(iter.next(), Some(2));
         assert_eq!(iter.next(), Some(1));
         assert_eq!(iter.next(), Some(2));
         assert_eq!(iter.next(), None);
-        assert_eq!(iter.next(), None);
     }
 
     #[test]
-    fn test_times_iteration_n3() {
+    fn test_iteration_n3() {
         let mut iter = (1..3).times(3);
         assert_eq!(iter.next(), Some(1));
         assert_eq!(iter.next(), Some(2));
@@ -97,47 +98,20 @@ mod tests {
         assert_eq!(iter.next(), Some(1));
         assert_eq!(iter.next(), Some(2));
         assert_eq!(iter.next(), None);
-        assert_eq!(iter.next(), None);
     }
 
     #[test]
-    fn test_times_size_hint_n2() {
-        let mut iter = (1..3).times(2);
-        assert_eq!(iter.size_hint(), (4, Some(4)));
-        iter.next();
-        assert_eq!(iter.size_hint(), (3, Some(3)));
-        iter.next();
-        assert_eq!(iter.size_hint(), (2, Some(2)));
-        iter.next();
-        assert_eq!(iter.size_hint(), (1, Some(1)));
-        iter.next();
-        assert_eq!(iter.size_hint(), (0, Some(0)));
-        iter.next();
-        assert_eq!(iter.size_hint(), (0, Some(0)));
+    fn test_size_n2() {
+        test_iter_size!((1..3).times(2), 4..=0);
     }
 
     #[test]
-    fn test_times_size_hint_n3() {
-        let mut iter = (1..3).times(3);
-        assert_eq!(iter.size_hint(), (6, Some(6)));
-        iter.next();
-        assert_eq!(iter.size_hint(), (5, Some(5)));
-        iter.next();
-        assert_eq!(iter.size_hint(), (4, Some(4)));
-        iter.next();
-        assert_eq!(iter.size_hint(), (3, Some(3)));
-        iter.next();
-        assert_eq!(iter.size_hint(), (2, Some(2)));
-        iter.next();
-        assert_eq!(iter.size_hint(), (1, Some(1)));
-        iter.next();
-        assert_eq!(iter.size_hint(), (0, Some(0)));
-        iter.next();
-        assert_eq!(iter.size_hint(), (0, Some(0)));
+    fn test_size_n3() {
+        test_iter_size!((1..3).times(3), 6..=0);
     }
 
     #[test]
-    fn test_times_size_hint_skip() {
+    fn test_size_hint_skip() {
         let iter = (1..3).times(2).skip(1);
         assert_eq!(iter.size_hint(), (3, Some(3)));
 
@@ -155,23 +129,7 @@ mod tests {
     }
 
     #[test]
-    fn test_times_len() {
-        let mut iter = (1..3).times(2);
-        assert_eq!(iter.len(), 4);
-        iter.next();
-        assert_eq!(iter.len(), 3);
-        iter.next();
-        assert_eq!(iter.len(), 2);
-        iter.next();
-        assert_eq!(iter.len(), 1);
-        iter.next();
-        assert_eq!(iter.len(), 0);
-        iter.next();
-        assert_eq!(iter.len(), 0);
-    }
-
-    #[test]
-    fn test_times_isomorphism() {
+    fn test_isomorphism() {
         let iter = 1..10;
         assert_eq!(
             iter.clone().times(1).collect::<Vec<i32>>(),
@@ -182,15 +140,13 @@ mod tests {
                 .times(1)
                 .times(1)
                 .times(1)
-                .times(1)
-                .times(1)
                 .collect::<Vec<i32>>(),
             iter.clone().collect::<Vec<i32>>(),
         );
     }
 
     #[test]
-    fn test_times_pipelining() {
+    fn test_pipelining() {
         assert_eq!(
             (1..3).times(2).map(|x| x * 2).collect::<Vec<i32>>(),
             vec![2, 4, 2, 4]

@@ -1,5 +1,6 @@
 pub mod every;
 pub mod repeat;
+mod test;
 pub mod times;
 
 #[cfg(test)]

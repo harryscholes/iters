@@ -79,10 +79,12 @@ impl<I: Iterator> RepeatIterator for I {}
 
 #[cfg(test)]
 mod tests {
+    use crate::test_iter_size;
+
     use super::*;
 
     #[test]
-    fn test_repeat_iterator_adapter() {
+    fn test_iterator_adapter() {
         assert_eq!(
             (1..3).repeat(2).collect::<Vec<i32>>(),
             Repeat::new(1..3, 2).collect::<Vec<i32>>()
@@ -94,90 +96,27 @@ mod tests {
     }
 
     #[test]
-    fn test_repeat_iteration() {
+    fn test_iteration() {
         let mut iter = (1..3).repeat(2);
         assert_eq!(iter.next(), Some(1));
         assert_eq!(iter.next(), Some(1));
         assert_eq!(iter.next(), Some(2));
         assert_eq!(iter.next(), Some(2));
         assert_eq!(iter.next(), None);
-        assert_eq!(iter.next(), None);
     }
 
     #[test]
-    fn test_repeat_size_hint_n3() {
-        let mut iter = (1..3).repeat(3);
-        assert_eq!(iter.size_hint(), (6, Some(6)));
-        iter.next();
-        assert_eq!(iter.size_hint(), (5, Some(5)));
-        iter.next();
-        assert_eq!(iter.size_hint(), (4, Some(4)));
-        iter.next();
-        assert_eq!(iter.size_hint(), (3, Some(3)));
-        iter.next();
-        assert_eq!(iter.size_hint(), (2, Some(2)));
-        iter.next();
-        assert_eq!(iter.size_hint(), (1, Some(1)));
-        iter.next();
-        assert_eq!(iter.size_hint(), (0, Some(0)));
-        iter.next();
-        assert_eq!(iter.size_hint(), (0, Some(0)));
+    fn test_size_n3() {
+        test_iter_size!((1..3).repeat(3), 6..=0);
     }
 
     #[test]
-    fn test_repeat_size_hint_n2() {
-        let mut iter = (1..3).repeat(2);
-        assert_eq!(iter.size_hint(), (4, Some(4)));
-        iter.next();
-        assert_eq!(iter.size_hint(), (3, Some(3)));
-        iter.next();
-        assert_eq!(iter.size_hint(), (2, Some(2)));
-        iter.next();
-        assert_eq!(iter.size_hint(), (1, Some(1)));
-        iter.next();
-        assert_eq!(iter.size_hint(), (0, Some(0)));
-        iter.next();
-        assert_eq!(iter.size_hint(), (0, Some(0)));
+    fn test_size_n2() {
+        test_iter_size!((1..4).repeat(2), 8..=0);
     }
 
     #[test]
-    fn test_repeat_len_n3() {
-        let mut iter = (1..3).repeat(3);
-        assert_eq!(iter.len(), 6);
-        iter.next();
-        assert_eq!(iter.len(), 5);
-        iter.next();
-        assert_eq!(iter.len(), 4);
-        iter.next();
-        assert_eq!(iter.len(), 3);
-        iter.next();
-        assert_eq!(iter.len(), 2);
-        iter.next();
-        assert_eq!(iter.len(), 1);
-        iter.next();
-        assert_eq!(iter.len(), 0);
-        iter.next();
-        assert_eq!(iter.len(), 0);
-    }
-
-    #[test]
-    fn test_repeat_len_n2() {
-        let mut iter = (1..3).repeat(2);
-        assert_eq!(iter.len(), 4);
-        iter.next();
-        assert_eq!(iter.len(), 3);
-        iter.next();
-        assert_eq!(iter.len(), 2);
-        iter.next();
-        assert_eq!(iter.len(), 1);
-        iter.next();
-        assert_eq!(iter.len(), 0);
-        iter.next();
-        assert_eq!(iter.len(), 0);
-    }
-
-    #[test]
-    fn test_repeat_isomorphism() {
+    fn test_isomorphism() {
         let iter = 1..10;
         assert_eq!(
             iter.clone().repeat(1).collect::<Vec<i32>>(),
@@ -188,15 +127,13 @@ mod tests {
                 .repeat(1)
                 .repeat(1)
                 .repeat(1)
-                .repeat(1)
-                .repeat(1)
                 .collect::<Vec<i32>>(),
             iter.clone().collect::<Vec<i32>>(),
         );
     }
 
     #[test]
-    fn test_repeat_pipelining() {
+    fn test_pipelining() {
         assert_eq!(
             (1..3).repeat(2).map(|x| x * 2).collect::<Vec<i32>>(),
             vec![2, 2, 4, 4]

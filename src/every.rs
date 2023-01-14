@@ -10,11 +10,7 @@ impl<I: Iterator> Every<I> {
     }
 }
 
-impl<I> Iterator for Every<I>
-where
-    I: Iterator,
-    I::Item: Clone,
-{
+impl<I: Iterator> Iterator for Every<I> {
     type Item = <I as Iterator>::Item;
 
     fn next(&mut self) -> Option<<I as Iterator>::Item> {
@@ -36,18 +32,8 @@ where
     }
 }
 
-impl<I> ExactSizeIterator for Every<I>
-where
-    I: ExactSizeIterator + Iterator,
-    I::Item: Clone,
-{
-}
-impl<I> std::iter::FusedIterator for Every<I>
-where
-    I: std::iter::FusedIterator + Iterator,
-    I::Item: Clone,
-{
-}
+impl<I> ExactSizeIterator for Every<I> where I: ExactSizeIterator + Iterator {}
+impl<I> std::iter::FusedIterator for Every<I> where I: std::iter::FusedIterator + Iterator {}
 
 pub trait EveryIterator: Iterator {
     fn every(self, n: usize) -> Every<Self>
@@ -62,10 +48,12 @@ impl<I: Iterator> EveryIterator for I {}
 
 #[cfg(test)]
 mod tests {
+    use crate::test_iter_size;
+
     use super::*;
 
     #[test]
-    fn test_every_iterator_adapter() {
+    fn test_iterator_adapter() {
         assert_eq!(
             (1..9).every(2).collect::<Vec<i32>>(),
             Every::new(1..9, 2).collect::<Vec<i32>>()
@@ -77,117 +65,36 @@ mod tests {
     }
 
     #[test]
-    fn test_every_iteration() {
+    fn test_iteration() {
         let mut iter = (1..9).every(3);
         assert_eq!(iter.next(), Some(1));
         assert_eq!(iter.next(), Some(4));
         assert_eq!(iter.next(), Some(7));
         assert_eq!(iter.next(), None);
-        assert_eq!(iter.next(), None);
     }
 
     #[test]
-    fn test_every_size_hint_n2() {
-        let mut iter = (1..10).every(2);
-        assert_eq!(iter.size_hint(), (5, Some(5)));
-        iter.next();
-        assert_eq!(iter.size_hint(), (4, Some(4)));
-        iter.next();
-        assert_eq!(iter.size_hint(), (3, Some(3)));
-        iter.next();
-        assert_eq!(iter.size_hint(), (2, Some(2)));
-        iter.next();
-        assert_eq!(iter.size_hint(), (1, Some(1)));
-        iter.next();
-        assert_eq!(iter.size_hint(), (0, Some(0)));
+    fn test_size_n2() {
+        test_iter_size!((1..10).every(2), 5..=0);
     }
 
     #[test]
-    fn test_every_size_hint_n3() {
-        let mut iter = (1..10).every(3);
-        assert_eq!(iter.size_hint(), (3, Some(3)));
-        iter.next();
-        assert_eq!(iter.size_hint(), (2, Some(2)));
-        iter.next();
-        assert_eq!(iter.size_hint(), (1, Some(1)));
-        iter.next();
-        assert_eq!(iter.size_hint(), (0, Some(0)));
+    fn test_size_n3() {
+        test_iter_size!((1..10).every(3), 3..=0);
     }
 
     #[test]
-    fn test_every_size_hint_n4() {
-        let mut iter = (1..10).every(4);
-        assert_eq!(iter.size_hint(), (3, Some(3)));
-        iter.next();
-        assert_eq!(iter.size_hint(), (2, Some(2)));
-        iter.next();
-        assert_eq!(iter.size_hint(), (1, Some(1)));
-        iter.next();
-        assert_eq!(iter.size_hint(), (0, Some(0)));
+    fn test_size_n4() {
+        test_iter_size!((1..10).every(4), 3..=0);
     }
 
     #[test]
-    fn test_every_size_hint_n5() {
-        let mut iter = (1..10).every(5);
-        assert_eq!(iter.size_hint(), (2, Some(2)));
-        iter.next();
-        assert_eq!(iter.size_hint(), (1, Some(1)));
-        iter.next();
-        assert_eq!(iter.size_hint(), (0, Some(0)));
+    fn test_size_n5() {
+        test_iter_size!((1..10).every(5), 2..=0);
     }
 
     #[test]
-    fn test_every_len_n2() {
-        let mut iter = (1..10).every(2);
-        assert_eq!(iter.len(), 5);
-        iter.next();
-        assert_eq!(iter.len(), 4);
-        iter.next();
-        assert_eq!(iter.len(), 3);
-        iter.next();
-        assert_eq!(iter.len(), 2);
-        iter.next();
-        assert_eq!(iter.len(), 1);
-        iter.next();
-        assert_eq!(iter.len(), 0);
-    }
-
-    #[test]
-    fn test_every_len_n3() {
-        let mut iter = (1..10).every(3);
-        assert_eq!(iter.len(), 3);
-        iter.next();
-        assert_eq!(iter.len(), 2);
-        iter.next();
-        assert_eq!(iter.len(), 1);
-        iter.next();
-        assert_eq!(iter.len(), 0);
-    }
-
-    #[test]
-    fn test_every_len_n4() {
-        let mut iter = (1..10).every(4);
-        assert_eq!(iter.len(), 3);
-        iter.next();
-        assert_eq!(iter.len(), 2);
-        iter.next();
-        assert_eq!(iter.len(), 1);
-        iter.next();
-        assert_eq!(iter.len(), 0);
-    }
-
-    #[test]
-    fn test_every_len_n5() {
-        let mut iter = (1..10).every(5);
-        assert_eq!(iter.len(), 2);
-        iter.next();
-        assert_eq!(iter.len(), 1);
-        iter.next();
-        assert_eq!(iter.len(), 0);
-    }
-
-    #[test]
-    fn test_every_isomorphism() {
+    fn test_isomorphism() {
         let iter = 1..10;
         assert_eq!(
             iter.clone().every(1).collect::<Vec<i32>>(),
@@ -198,15 +105,13 @@ mod tests {
                 .every(1)
                 .every(1)
                 .every(1)
-                .every(1)
-                .every(1)
                 .collect::<Vec<i32>>(),
             iter.clone().collect::<Vec<i32>>(),
         );
     }
 
     #[test]
-    fn test_every_pipelining() {
+    fn test_pipelining() {
         assert_eq!(
             (1..10).every(3).map(|x| x * 2).collect::<Vec<i32>>(),
             vec![2, 8, 14]
